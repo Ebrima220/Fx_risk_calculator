@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fx Risk Calculator</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <script>
+    (function () {
+      var t = localStorage.getItem('theme') || 'dark'
+      document.documentElement.setAttribute('data-theme', t)
+    })()
+  </script>
+</head>
+
+<body
+  class="bg-bg text-text font-mono min-h-screen py-5 px-3 pb-12 text-sm sm:py-8 sm:px-4 sm:pb-16 md:py-10 md:px-6 lg:py-12 lg:px-8 transition-colors duration-200">
+  <div class="w-full max-w-full mx-auto sm:max-w-xl md:max-w-2xl lg:max-w-6xl">
+
+    <header class="page-header mb-6 pb-5 border-b border-border sm:mb-8 sm:pb-6 md:mb-10">
+      <div class="font-syne text-[10px] sm:text-[11px] font-bold tracking-[0.2em] text-accent uppercase mb-1.5 sm:mb-2">
+        &#9632; FX Tools</div>
+      <div class="flex items-start justify-between gap-3 sm:gap-4">
+        <div class="min-w-0 flex-1">
+          <h1 class="font-syne text-2xl sm:text-[28px] lg:text-3xl font-extrabold text-text leading-tight">Risk <span
+              class="text-accent">Calculator</span></h1>
+          <p class="text-xs text-muted mt-1 sm:mt-1.5 tracking-wide max-w-prose">Enter your trade details, then press
+            Calculate.</p>
+        </div>
+        <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+          </svg>
+          <svg class="icon-moon w-5 h-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start xl:gap-10">
+
+      <!-- FORMS -->
+      <div class="flex flex-col gap-4 min-w-0">
+
+        <!-- ACCOUNT -->
+        <div class="section-card">
+          <div class="section-label">Account</div>
+          <div class="field-grid">
+            <div class="field-wrap-full">
+              <label class="field-label" for="balance">Account Balance ($)</label>
+              <input type="number" class="field-input" id="balance" placeholder="e.g. 10000" value="10000" min="0"
+                step="100">
+            </div>
+          </div>
+        </div>
+
+        <!-- TRADE -->
+        <div class="section-card">
+          <div class="section-label">Trade Setup</div>
+          <div class="field-grid">
+            <div class="field-wrap-full">
+              <label class="field-label" for="pair">Currency Pair</label>
+              <select class="field-input" id="pair">
+                <option value="xxxusd">USD Quote — EUR/USD, GBP/USD, AUD/USD…</option>
+                <option value="usdxxx">USD Base — USD/CAD, USD/CHF…</option>
+                <option value="usdjpy">USD/JPY (& JPY pairs)</option>
+                <option value="xauusd">XAU/USD — Gold</option>
+              </select>
+            </div>
+            <div class="field-wrap">
+              <label class="field-label" for="entry">Entry Price</label>
+              <input type="number" class="field-input" id="entry" placeholder="e.g. 1.0850" step="0.00001">
+            </div>
+            <div class="field-wrap">
+              <label class="field-label" for="lottype">Lot Size</label>
+              <select class="field-input" id="lottype">
+                <option value="100000">Standard (1.00)</option>
+                <option value="10000">Mini (0.10)</option>
+                <option value="1000">Micro (0.01)</option>
+              </select>
+            </div>
+            <div class="field-wrap">
+              <label class="field-label" for="sl">Stop Loss Price</label>
+              <input type="number" class="field-input" id="sl" placeholder="e.g. 1.0820" step="0.00001">
+            </div>
+            <div class="field-wrap">
+              <label class="field-label" for="tp">Take Profit Price</label>
+              <input type="number" class="field-input" id="tp" placeholder="e.g. 1.0910" step="0.00001">
+            </div>
+            <div class="field-wrap-full sm:col-span-2">
+              <button type="button" id="calculateBtn" class="btn-calculate">Calculate</button>
+            </div>
+            <div id="advice" class="field-wrap-full sm:col-span-2">
+              <div class="advice-panel">
+                <div class="advice-header">&#9670; Trading Advice</div>
+                <p class="advice-empty">Press Calculate after filling in your trade details to see risk % and advice.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OUTPUT -->
+      <div id="output" class="min-w-0 lg:sticky lg:top-6">
+        <div class="placeholder-wrap">
+          <svg class="mb-3 opacity-30 mx-auto block w-8 h-8 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4l3 3" />
+          </svg>
+          <div>Fill in your details and press Calculate</div>
+        </div>
+      </div>
+    </div>
+
+    <footer
+      class="text-center text-[10px] sm:text-[11px] text-muted mt-6 sm:mt-8 lg:mt-10 tracking-wide leading-relaxed px-2 sm:px-0">
+      <span class="block sm:inline">No login required</span>
+      <span class="hidden sm:inline">&nbsp;·&nbsp;</span>
+      <span class="block sm:inline">All calculations are client-side</span>
+      <span class="hidden sm:inline">&nbsp;·&nbsp;</span>
+      <span class="block sm:inline">For educational use only</span>
+      <span class="hidden sm:inline">&nbsp;·&nbsp;</span>
+
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
