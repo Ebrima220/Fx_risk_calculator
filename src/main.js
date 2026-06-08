@@ -33,6 +33,43 @@ inputs.forEach((id) => {
   })
 })
 
+// Numeric-only enforcement for text inputs that represent numbers
+const numericFields = ['balance', 'entry', 'sl', 'tp']
+
+numericFields.forEach((id) => {
+  const el = document.getElementById(id)
+
+  // Block non-numeric keypresses
+  el.addEventListener('keydown', (e) => {
+    const allowed = [
+      'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+      'Tab', 'Enter', 'Home', 'End',
+    ]
+    // Allow control combos (Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X)
+    if (e.ctrlKey || e.metaKey) return
+    // Allow navigation/editing keys
+    if (allowed.includes(e.key)) return
+    // Allow digits
+    if (/^\d$/.test(e.key)) return
+    // Allow a single decimal point
+    if (e.key === '.' && !el.value.includes('.')) return
+    // Block everything else
+    e.preventDefault()
+  })
+
+  // Strip any non-numeric characters that slip through (e.g. paste)
+  el.addEventListener('input', () => {
+    const cursor = el.selectionStart
+    const cleaned = el.value
+      .replace(/[^0-9.]/g, '')           // remove non-digit, non-dot
+      .replace(/^(\d*\.?)(.*)$/, (_, a, b) => a + b.replace(/\./g, '')) // keep only first dot
+    if (el.value !== cleaned) {
+      el.value = cleaned
+      el.setSelectionRange(cursor - 1, cursor - 1)
+    }
+  })
+})
+
 const LOTS = 1 // one lot of the selected tier
 
 // Standard MT4/MT5 contract sizes
@@ -194,8 +231,8 @@ function calculate() {
   const out = document.getElementById('output')
   const lotLabel = lotTypeLabel(lotSize)
 
-  if (!balance || !entry || !sl || !tp) {
-    out.innerHTML = placeholder('Enter account balance, entry, SL, and TP to see results')
+  if (!balance || !entry || !sl || !tp || !pair) {
+    out.innerHTML = placeholder('Enter account balance, select a currency pair, and fill in entry, SL and TP')
     renderAdviceWaiting()
     return
   }
